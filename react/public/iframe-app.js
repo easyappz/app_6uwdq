@@ -90,6 +90,8 @@ window.handleRoutes = function(pages) {
 };
 
 document.addEventListener('DOMContentLoaded', function() {
+  let currentHoverElement = null;
+
   // Обработчик сообщений для включения/выключения режима редактирования
   window.addEventListener('message', function(event) {
     if (event.data && event.data.type === 'enableEasyEditMode') {
@@ -111,27 +113,52 @@ document.addEventListener('DOMContentLoaded', function() {
     
     elements.forEach(element => {
       element.removeEventListener('click', handleEasyTagClick);
-      element.removeEventListener('mouseenter', handleMouseEnter);
-      element.removeEventListener('mouseleave', handleMouseLeave);
+      element.removeEventListener('mouseover', handleMouseOver);
+      element.removeEventListener('mouseout', handleMouseOut);
       
-      // Удаляем подсказку если она есть
+      // Удаляем подсказку если она есть и классы
       if (element._easyTagLabel) {
         element._easyTagLabel.remove();
         element._easyTagLabel = null;
       }
+      element.classList.remove('easy-hover-active');
     });
+    
+    currentHoverElement = null;
   }
 
   // Обработчики для показа/скрытия подсказки
-  function handleMouseEnter() {
-    if (!this._easyTagLabel) {
-      const tagName = this.tagName.toLowerCase();
+  function handleMouseOver(event) {
+    event.stopPropagation();
+    
+    // Находим ближайший элемент с data-easytag
+    const easyTagElement = event.target.closest('[data-easytag]');
+    if (!easyTagElement) return;
+    
+    // Если это уже текущий элемент, ничего не делаем
+    if (easyTagElement === currentHoverElement) return;
+    
+    // Убираем выделение с предыдущего элемента
+    if (currentHoverElement) {
+      currentHoverElement.classList.remove('easy-hover-active');
+      if (currentHoverElement._easyTagLabel) {
+        currentHoverElement._easyTagLabel.remove();
+        currentHoverElement._easyTagLabel = null;
+      }
+    }
+    
+    // Устанавливаем новый текущий элемент
+    currentHoverElement = easyTagElement;
+    
+    // Создаем подсказку
+    if (!easyTagElement._easyTagLabel) {
+      const tagName = easyTagElement.tagName.toLowerCase();
       const label = document.createElement('div');
       label.className = 'easy-tag-label';
       label.textContent = tagName;
 
       // Для очень маленьких элементов используем уменьшенную подсказку
-      const rect = this.getBoundingClientRect();
+      const rect = easyTagElement.getBoundingClientRect();
       if (rect.width < 50 || rect.height < 30) {
         label.classList.add('small');
       }
@@ -141,15 +168,29 @@ document.addEventListener('DOMContentLoaded', function() {
         label.classList.add('top-right');
       }
 
-      this.appendChild(label);
-      this._easyTagLabel = label;
+      easyTagElement.appendChild(label);
+      easyTagElement._easyTagLabel = label;
     }
+    
+    // Добавляем класс выделения
+    easyTagElement.classList.add('easy-hover-active');
   }
 
-  function handleMouseLeave() {
-    if (this._easyTagLabel) {
-      this._easyTagLabel.remove();
-      this._easyTagLabel = null;
+  function handleMouseOut(event) {
+    event.stopPropagation();
+    
+    // Проверяем, покидаем ли мы текущий элемент
+    const relatedTarget = event.relatedTarget;
+    if (!relatedTarget || !currentHoverElement) return;
+    
+    // Если мы переходим на элемент, который не является потомком текущего элемента
+    if (!currentHoverElement.contains(relatedTarget)) {
+      currentHoverElement.classList.remove('easy-hover-active');
+      if (currentHoverElement._easyTagLabel) {
+        currentHoverElement._easyTagLabel.remove();
+        currentHoverElement._easyTagLabel = null;
+      }
+      currentHoverElement = null;
     }
   }
 
@@ -160,13 +201,13 @@ document.addEventListener('DOMContentLoaded', function() {
     elements.forEach(element => {
       // Удаляем старые обработчики
       element.removeEventListener('click', handleEasyTagClick);
-      element.removeEventListener('mouseenter', handleMouseEnter);
-      element.removeEventListener('mouseleave', handleMouseLeave);
+      element.removeEventListener('mouseover', handleMouseOver);
+      element.removeEventListener('mouseout', handleMouseOut);
       
       // Добавляем новые обработчики
       element.addEventListener('click', handleEasyTagClick);
-      element.addEventListener('mouseenter', handleMouseEnter);
-      element.addEventListener('mouseleave', handleMouseLeave);
+      element.addEventListener('mouseover', handleMouseOver);
+      element.addEventListener('mouseout', handleMouseOut);
     });
   }
 
@@ -177,8 +218,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     event.stopPropagation();
-    const easyTagData = this.getAttribute('data-easytag');
-    const tagName = this.tagName.toLowerCase();
+    const easyTagElement = event.target.closest('[data-easytag]');
+    if (!easyTagElement) return;
+    
+    const easyTagData = easyTagElement.getAttribute('data-easytag');
+    const tagName = easyTagElement.tagName.toLowerCase();
     
     console.log('Clicked element:', { 
       tag: tagName, 
@@ -192,8 +236,8 @@ document.addEventListener('DOMContentLoaded', function() {
       tagName: tagName,
       elementInfo: {
         tag: tagName,
-        classes: this.className,
-        id: this.id
+        classes: easyTagElement.className,
+        id: easyTagElement.id
       }
     }, '*');
 
