@@ -100,28 +100,38 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (event.data && event.data.type === 'disableEasyEditMode') {
       document.body.classList.remove('easy-mode-edit');
-      removeEasyTagLabels();
+      removeEasyTagHandlers();
       console.log('❌ Easy edit mode disabled');
     }
   });
 
-  // Функция для создания подсказок с названиями тегов
-  function createTagLabels() {
+  // Функция для удаления всех обработчиков
+  function removeEasyTagHandlers() {
     const elements = document.querySelectorAll('[data-easytag]');
     
     elements.forEach(element => {
-      // Проверяем, есть ли уже подсказка
-      if (element.querySelector('.easy-tag-label')) {
-        return;
+      element.removeEventListener('click', handleEasyTagClick);
+      element.removeEventListener('mouseenter', handleMouseEnter);
+      element.removeEventListener('mouseleave', handleMouseLeave);
+      
+      // Удаляем подсказку если она есть
+      if (element._easyTagLabel) {
+        element._easyTagLabel.remove();
+        element._easyTagLabel = null;
       }
+    });
+  }
 
-      const tagName = element.tagName.toLowerCase();
+  // Обработчики для показа/скрытия подсказки
+  function handleMouseEnter() {
+    if (!this._easyTagLabel) {
+      const tagName = this.tagName.toLowerCase();
       const label = document.createElement('div');
       label.className = 'easy-tag-label';
       label.textContent = tagName;
 
       // Для очень маленьких элементов используем уменьшенную подсказку
-      const rect = element.getBoundingClientRect();
+      const rect = this.getBoundingClientRect();
       if (rect.width < 50 || rect.height < 30) {
         label.classList.add('small');
       }
@@ -131,28 +141,32 @@ document.addEventListener('DOMContentLoaded', function() {
         label.classList.add('top-right');
       }
 
-      element.appendChild(label);
-    });
+      this.appendChild(label);
+      this._easyTagLabel = label;
+    }
   }
 
-  // Функция для удаления всех подсказок
-  function removeEasyTagLabels() {
-    const labels = document.querySelectorAll('.easy-tag-label');
-    labels.forEach(label => {
-      label.remove();
-    });
+  function handleMouseLeave() {
+    if (this._easyTagLabel) {
+      this._easyTagLabel.remove();
+      this._easyTagLabel = null;
+    }
   }
 
   // Функция для инициализации обработчиков событий
   function initEasyTagHandlers() {
     const elements = document.querySelectorAll('[data-easytag]');
     
-    // Создаем подсказки при инициализации
-    createTagLabels();
-    
     elements.forEach(element => {
+      // Удаляем старые обработчики
       element.removeEventListener('click', handleEasyTagClick);
+      element.removeEventListener('mouseenter', handleMouseEnter);
+      element.removeEventListener('mouseleave', handleMouseLeave);
+      
+      // Добавляем новые обработчики
       element.addEventListener('click', handleEasyTagClick);
+      element.addEventListener('mouseenter', handleMouseEnter);
+      element.addEventListener('mouseleave', handleMouseLeave);
     });
   }
 
