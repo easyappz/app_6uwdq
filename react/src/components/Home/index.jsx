@@ -1,10 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React from "react";
+import Calculator from "../../components/Calculator";
 
-/**
- * Для ИИ: Это заглушка. Обнови этот компонент. Здесь должен быть начальный экран приложения.
- */
-export const Home = () => {
+export default function Home() {
   return (
-    <div>This is home page</div>
+    <div style={{ background: "#000", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }} data-easytag="id23-react/src/components/Home/index.jsx">
+      <Calculator />
+    </div>
   );
-};
+}

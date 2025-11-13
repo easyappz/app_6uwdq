@@ -1,25 +1,23 @@
-import React, { useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
-import ErrorBoundary from './ErrorBoundary';
-import './App.css';
-
-import { Home } from './components/Home';
+import React, { useEffect } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Home from "./components/Home";
+import "./App.css";
 
 function App() {
-  /** Никогда не удаляй этот код */
   useEffect(() => {
-    if (typeof window !== 'undefined' && typeof window.handleRoutes === 'function') {
-      /** Нужно передавать список существующих роутов */
-      window.handleRoutes(['/']);
+    if (typeof window !== "undefined" && typeof window.handleRoutes === "function") {
+      window.handleRoutes(["/"]);
     }
   }, []);
 
   return (
-    <ErrorBoundary>
-      <Routes>
-        <Route path="/" element={<Home />} />
-      </Routes>
-    </ErrorBoundary>
+    <div className="App" data-easytag="id24-react/src/App.jsx">
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+        </Routes>
+      </BrowserRouter>
+    </div>
   );
 }
 
