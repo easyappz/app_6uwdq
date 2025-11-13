@@ -28,16 +28,17 @@
 
     <!-- Этот код нельзя удалять и редактировать -->
     <style>
-      .easy-mode-edit [data-easytag]:hover {
+      .easy-mode-edit [data-easytag] {
+        position: relative;
+        transition: all 0.2s ease;
+      }
+
+      .easy-mode-edit [data-easytag].easy-hover-active {
         outline: 2px solid #8b5cf6;
         background-color: rgba(139, 92, 246, 0.05);
         cursor: pointer;
         position: relative;
-      }
-
-      .easy-mode-edit [data-easytag] {
-        position: relative;
-        transition: all 0.2s ease;
+        z-index: 1000;
       }
 
       /* Стили для подсказки с названием тега */
@@ -51,7 +52,7 @@
         font-weight: 600;
         padding: 2px 6px;
         border-radius: 4px 0 4px 0;
-        z-index: 10000;
+        z-index: 10001;
         pointer-events: none;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         line-height: 1.2;
@@ -61,7 +62,7 @@
         transition: all 0.2s ease;
       }
 
-      .easy-mode-edit [data-easytag]:hover .easy-tag-label {
+      .easy-mode-edit [data-easytag].easy-hover-active .easy-tag-label {
         opacity: 1;
         transform: translateY(0);
       }
@@ -77,6 +78,16 @@
       .easy-tag-label.small {
         font-size: 9px;
         padding: 1px 4px;
+      }
+
+      /* Отключаем hover для всех элементов когда активен режим редактирования */
+      .easy-mode-edit [data-easytag] {
+        pointer-events: none;
+      }
+
+      /* Включаем pointer-events только для самого глубокого элемента */
+      .easy-mode-edit [data-easytag] * {
+        pointer-events: auto;
       }
     </style>
   </head>
