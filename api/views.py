@@ -14,6 +14,6 @@ class HelloView(APIView):
         responses={200: MessageSerializer}, description="Get a hello world message"
     )
     def get(self, request):
-        data = {"message": "Hello!", "timestamp": timezone.now()}
-        serializer = MessageSerializer(data)
+        payload = {"message": "Hello!", "timestamp": timezone.now()}
+        serializer = MessageSerializer(instance=payload)
         return Response(serializer.data)
